@@ -1,63 +1,75 @@
 import { useState } from "react";
-import AnswerPanel from "./components/AnswerPanel.jsx";
-import EmptyState from "./components/EmptyState.jsx";
-import LoadingState from "./components/LoadingState.jsx";
-import SearchInput from "./components/SearchInput.jsx";
-import SuggestedQuestions from "./components/SuggestedQuestions.jsx";
-import { requestNavigationGuidance } from "./services/navigationAPI.js";
+import Header from "./components/Header.jsx";
+import NavigationBar from "./components/NavigationBar.jsx";
+import GrowthResources from "./components/GrowthResources.jsx";
+import EventCalendar from "./components/EventCalendar.jsx";
+import Communities from "./components/Communities.jsx";
+import NavigationModal from "./components/NavigationModal.jsx";
+import Toast from "./components/Toast.jsx";
+import { toastMessages } from "./services/mockData.js";
 
 export default function App() {
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [showNavigationModal, setShowNavigationModal] = useState(false);
+  const [toasts, setToasts] = useState([]);
 
-  async function handleQuestion(question) {
-    setIsLoading(true);
-    setError("");
+  const showToast = (message, type = "success") => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, message, type }]);
+  };
 
-    try {
-      const guidance = await requestNavigationGuidance(question);
-      setResult(guidance);
-    } catch (requestError) {
-      setResult(null);
-      setError(
-        requestError.response?.data?.error ||
-          "The navigation service is unavailable. Confirm the backend is running on port 3000."
-      );
-    } finally {
-      setIsLoading(false);
+  const removeToast = (id) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
+
+  const handleEnroll = (programName) => {
+    showToast(toastMessages.enrollProgram(programName), "success");
+  };
+
+  const handleRSVP = (eventName, isCancel = false) => {
+    if (isCancel) {
+      showToast(toastMessages.rsvpCancel(eventName), "info");
+    } else {
+      showToast(toastMessages.rsvpSuccess(eventName), "success");
     }
-  }
+  };
+
+  const handleJoinCommunity = (communityName) => {
+    showToast(toastMessages.joinCommunity(communityName), "success");
+  };
 
   return (
-    <main className="app-shell">
-      <section className="hero">
-        <div>
-          <p className="eyebrow">NBCUniversal Prototype</p>
-          <h1>AI Navigation Assistant</h1>
-          <p className="hero-copy">
-            A guided search layer for employees moving through enterprise systems, onboarding,
-            SAP workflows, HR resources, IT access, and support paths.
-          </p>
-        </div>
-        <div className="status-grid" aria-label="Prototype capabilities">
-          <span>Claude API ready</span>
-          <span>Mock resources</span>
-          <span>Fallback answers</span>
-        </div>
-      </section>
+    <div className="app-container">
+      <Header onSearchClick={() => setShowNavigationModal(true)} />
+      <NavigationBar />
 
-      <section className="workspace">
-        <div className="left-panel">
-          <SearchInput onSubmit={handleQuestion} isLoading={isLoading} />
-          <SuggestedQuestions onSelect={handleQuestion} isLoading={isLoading} />
-        </div>
+      <main className="main-content">
+        <section className="content-wrapper">
+          <h1 className="page-title">Growth Engine</h1>
 
-        <div className="right-panel">
-          {error && <div className="error-banner">{error}</div>}
-          {isLoading ? <LoadingState /> : result ? <AnswerPanel result={result} /> : <EmptyState />}
-        </div>
-      </section>
-    </main>
+          <GrowthResources onEnroll={handleEnroll} />
+
+          <div className="events-communities-grid">
+            <EventCalendar onRSVP={handleRSVP} />
+            <Communities onJoin={handleJoinCommunity} />
+          </div>
+        </section>
+      </main>
+
+      {showNavigationModal && (
+        <NavigationModal onClose={() => setShowNavigationModal(false)} />
+      )}
+
+      {/* Toast Notifications */}
+      <div className="toast-container">
+        {toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
