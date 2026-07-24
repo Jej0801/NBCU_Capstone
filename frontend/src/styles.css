@@ -1849,7 +1849,7 @@ body {
 
 .benefits-grid,
 .programs-grid,
-.resources-grid {
+.community-resources-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(calc(180px * var(--scale-factor)), 1fr));
   gap: calc(12px * var(--scale-factor));

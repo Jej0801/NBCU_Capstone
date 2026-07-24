@@ -207,7 +207,7 @@ export default function CommunityDetailModal({ community, onClose, onJoin }) {
 
               <div className="community-section">
                 <h3>Resources Available</h3>
-                <div className="resources-grid">
+                <div className="community-resources-grid">
                   {community.resources.map((resource, idx) => (
                     <div key={idx} className="resource-badge">
                       📚 {resource}
