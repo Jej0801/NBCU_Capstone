@@ -90,9 +90,16 @@ export default function ResourceDetailModal({ resource, onClose, onEnroll }) {
                 <div className="next-cohort">
                   <strong>Next Cohort Starts:</strong> {resource.nextCohort}
                 </div>
-                <button className="cta-button" onClick={handleEnroll}>
-                  Apply Now
-                </button>
+                <div className="cta-buttons">
+                  <button className="cta-button" onClick={handleEnroll}>
+                    Apply Now
+                  </button>
+                  {resource.url && (
+                    <a href={resource.url} target="_blank" rel="noopener noreferrer" className="visit-link-button">
+                      Visit Site
+                    </a>
+                  )}
+                </div>
               </div>
             </>
           )}
@@ -145,9 +152,16 @@ export default function ResourceDetailModal({ resource, onClose, onEnroll }) {
                 <div className="upcoming-info">
                   <strong>{resource.upcomingSessions}</strong> sessions available this week
                 </div>
-                <button className="cta-button" onClick={handleEnroll}>
-                  Book a Session
-                </button>
+                <div className="cta-buttons">
+                  <button className="cta-button" onClick={handleEnroll}>
+                    Book a Session
+                  </button>
+                  {resource.url && (
+                    <a href={resource.url} target="_blank" rel="noopener noreferrer" className="visit-link-button">
+                      Visit Site
+                    </a>
+                  )}
+                </div>
               </div>
             </>
           )}
@@ -211,9 +225,16 @@ export default function ResourceDetailModal({ resource, onClose, onEnroll }) {
               </div>
 
               <div className="resource-cta">
-                <button className="cta-button" onClick={handleEnroll}>
-                  Browse All Courses
-                </button>
+                <div className="cta-buttons">
+                  <button className="cta-button" onClick={handleEnroll}>
+                    Browse All Courses
+                  </button>
+                  {resource.url && (
+                    <a href={resource.url} target="_blank" rel="noopener noreferrer" className="visit-link-button">
+                      Visit Site
+                    </a>
+                  )}
+                </div>
               </div>
             </>
           )}
@@ -284,9 +305,16 @@ export default function ResourceDetailModal({ resource, onClose, onEnroll }) {
               </div>
 
               <div className="resource-cta">
-                <button className="cta-button" onClick={handleEnroll}>
-                  Open myFeedback
-                </button>
+                <div className="cta-buttons">
+                  <button className="cta-button" onClick={handleEnroll}>
+                    Open myFeedback
+                  </button>
+                  {resource.url && (
+                    <a href={resource.url} target="_blank" rel="noopener noreferrer" className="visit-link-button">
+                      Visit Site
+                    </a>
+                  )}
+                </div>
               </div>
             </>
           )}

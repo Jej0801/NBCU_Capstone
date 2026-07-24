@@ -559,6 +559,17 @@ body {
 
 .community-card:hover {
   box-shadow: 0 8px 32px rgba(15, 23, 42, 0.14);
+  transform: translateY(-2px);
+}
+
+.community-card.hovered {
+  animation: wiggle-community 0.4s ease;
+}
+
+@keyframes wiggle-community {
+  0%, 100% { transform: translateY(-2px) rotate(0deg); }
+  25% { transform: translateY(-2px) rotate(-0.3deg); }
+  75% { transform: translateY(-2px) rotate(0.3deg); }
 }
 
 .community-image {
@@ -1303,6 +1314,14 @@ body {
 .upcoming-info {
   font-size: calc(14px * var(--scale-factor));
   color: var(--text-medium);
+  margin-bottom: calc(16px * var(--scale-factor));
+}
+
+.cta-buttons {
+  display: flex;
+  gap: calc(12px * var(--scale-factor));
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .cta-button,
@@ -1323,6 +1342,28 @@ body {
 .rsvp-button-large:hover,
 .join-button-large:hover {
   background: var(--purple-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(91, 33, 182, 0.3);
+}
+
+.visit-link-button {
+  display: inline-flex;
+  align-items: center;
+  background: white;
+  border: 2px solid var(--purple-primary);
+  border-radius: calc(10px * var(--scale-factor));
+  padding: calc(12px * var(--scale-factor)) calc(32px * var(--scale-factor));
+  font-size: calc(16px * var(--scale-factor));
+  font-weight: 700;
+  color: var(--purple-primary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.visit-link-button:hover {
+  background: var(--purple-primary);
+  color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(91, 33, 182, 0.3);
 }
