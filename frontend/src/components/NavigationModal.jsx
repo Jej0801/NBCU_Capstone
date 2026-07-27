@@ -123,128 +123,128 @@ export default function NavigationModal({ onClose, embedded = false }) {
         </button>
       )}
 
-        {/* Header - visible when no messages or collapsed after messages start */}
-        {!hasMessages && (
-          <div className="atlas-header">
-            <h1 className="atlas-title">Ask Atlas</h1>
-            <p className="atlas-subtitle">What do you need help finding?</p>
-          </div>
-        )}
+      {/* Header - visible when no messages or collapsed after messages start */}
+      {!hasMessages && (
+        <div className="atlas-header">
+          <h1 className="atlas-title">Ask Atlas</h1>
+          <p className="atlas-subtitle">What do you need help finding?</p>
+        </div>
+      )}
 
-        {/* Suggested question chips - only shown in idle state */}
-        {!hasMessages && !isLoading && (
-          <div className="atlas-chips-container">
-            {suggestedQuestions.map((q, idx) => (
-              <button
-                key={idx}
-                className="atlas-chip"
-                onClick={() => handleChipClick(q)}
-                disabled={isLoading}
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Chat thread - message history */}
-        {hasMessages && (
-          <div className="atlas-chat-thread" ref={chatThreadRef} aria-live="polite">
-            {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`atlas-message ${msg.role === "user" ? "atlas-message-user" : "atlas-message-assistant"}`}
-              >
-                {msg.role === "user" ? (
-                  <div className="atlas-message-bubble-user">{msg.content}</div>
-                ) : (
-                  <div className="atlas-message-bubble-assistant">
-                    {msg.isStreaming ? (
-                      <div className="atlas-streaming-text">{msg.rawText || "Atlas is thinking..."}</div>
-                    ) : (
-                      <div className="atlas-response-content">
-                        <div className="atlas-answer">{msg.content.answer}</div>
-                        {msg.content.nextSteps && msg.content.nextSteps.length > 0 && (
-                          <div className="atlas-next-steps">
-                            <strong>Next steps:</strong>
-                            <ol>
-                              {msg.content.nextSteps.map((step, i) => (
-                                <li key={i}>{step}</li>
-                              ))}
-                            </ol>
-                          </div>
-                        )}
-                        {msg.content.resources && msg.content.resources.length > 0 && (
-                          <div className="atlas-resources">
-                            {msg.content.resources.map((res, i) => (
-                              <a key={i} href={res.url} target="_blank" rel="noopener noreferrer" className="atlas-resource-link">
-                                {res.label} →
-                              </a>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {/* Loading indicator when waiting for response */}
-            {isLoading && messages[messages.length - 1]?.role === "user" && (
-              <div className="atlas-message atlas-message-assistant">
-                <div className="atlas-message-bubble-assistant">
-                  <div className="atlas-loading">Atlas is thinking...</div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Error message */}
-        {error && (
-          <div className="atlas-error-banner">
-            {error}
-          </div>
-        )}
-
-        {/* New chat button - shown when conversation is active */}
-        {hasMessages && (
-          <button className="atlas-new-chat-btn" onClick={handleNewChat} title="Start new conversation">
-            New Chat
-          </button>
-        )}
-
-        {/* Input field - always at bottom */}
-        <form className="atlas-input-form" onSubmit={handleSubmit}>
-          <label htmlFor="atlas-input" className="atlas-input-label">
-            Type your question
-          </label>
-          <div className="atlas-input-wrapper">
-            <input
-              id="atlas-input"
-              type="text"
-              className="atlas-input"
-              placeholder="Type your question here…"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              disabled={isLoading}
-              autoFocus={!hasMessages}
-            />
+      {/* Suggested question chips - only shown in idle state */}
+      {!hasMessages && !isLoading && (
+        <div className="atlas-chips-container">
+          {suggestedQuestions.map((q, idx) => (
             <button
-              type="submit"
-              className="atlas-send-btn"
-              disabled={isLoading || !input.trim()}
-              aria-label="Send message"
+              key={idx}
+              className="atlas-chip"
+              onClick={() => handleChipClick(q)}
+              disabled={isLoading}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
+              {q}
             </button>
-          </div>
-        </form>
-      </div>
+          ))}
+        </div>
+      )}
+
+      {/* Chat thread - message history */}
+      {hasMessages && (
+        <div className="atlas-chat-thread" ref={chatThreadRef} aria-live="polite">
+          {messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`atlas-message ${msg.role === "user" ? "atlas-message-user" : "atlas-message-assistant"}`}
+            >
+              {msg.role === "user" ? (
+                <div className="atlas-message-bubble-user">{msg.content}</div>
+              ) : (
+                <div className="atlas-message-bubble-assistant">
+                  {msg.isStreaming ? (
+                    <div className="atlas-streaming-text">{msg.rawText || "Atlas is thinking..."}</div>
+                  ) : (
+                    <div className="atlas-response-content">
+                      <div className="atlas-answer">{msg.content.answer}</div>
+                      {msg.content.nextSteps && msg.content.nextSteps.length > 0 && (
+                        <div className="atlas-next-steps">
+                          <strong>Next steps:</strong>
+                          <ol>
+                            {msg.content.nextSteps.map((step, i) => (
+                              <li key={i}>{step}</li>
+                            ))}
+                          </ol>
+                        </div>
+                      )}
+                      {msg.content.resources && msg.content.resources.length > 0 && (
+                        <div className="atlas-resources">
+                          {msg.content.resources.map((res, i) => (
+                            <a key={i} href={res.url} target="_blank" rel="noopener noreferrer" className="atlas-resource-link">
+                              {res.label} →
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Loading indicator when waiting for response */}
+          {isLoading && messages[messages.length - 1]?.role === "user" && (
+            <div className="atlas-message atlas-message-assistant">
+              <div className="atlas-message-bubble-assistant">
+                <div className="atlas-loading">Atlas is thinking...</div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Error message */}
+      {error && (
+        <div className="atlas-error-banner">
+          {error}
+        </div>
+      )}
+
+      {/* New chat button - shown when conversation is active */}
+      {hasMessages && (
+        <button className="atlas-new-chat-btn" onClick={handleNewChat} title="Start new conversation">
+          New Chat
+        </button>
+      )}
+
+      {/* Input field - always at bottom */}
+      <form className="atlas-input-form" onSubmit={handleSubmit}>
+        <label htmlFor="atlas-input" className="atlas-input-label">
+          Type your question
+        </label>
+        <div className="atlas-input-wrapper">
+          <input
+            id="atlas-input"
+            type="text"
+            className="atlas-input"
+            placeholder="Type your question here…"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={isLoading}
+            autoFocus={!hasMessages}
+          />
+          <button
+            type="submit"
+            className="atlas-send-btn"
+            disabled={isLoading || !input.trim()}
+            aria-label="Send message"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
   );
 
   // Return embedded or modal version
