@@ -18,7 +18,7 @@ export default function NavigationModal({ onClose, embedded = false }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const chatThreadRef = useRef(null);
-  const [useStreaming] = useState(true);
+  const [useStreaming] = useState(false); // Temporarily disable streaming
 
   // Auto-scroll chat thread to bottom when new messages arrive
   useEffect(() => {
