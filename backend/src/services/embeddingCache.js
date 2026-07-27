@@ -50,7 +50,7 @@ export function saveEmbeddingsCache(embeddedResources) {
 /**
  * Initialize embeddings - load from cache or generate new ones
  * @param {boolean} forceRegenerate - Force regeneration even if cache exists
- * @returns {Promise<Object[]>} - Resources with embeddings
+ * @returns {Promise<Object[]|null>} - Resources with embeddings, or null if failed
  */
 export async function initializeEmbeddings(forceRegenerate = false) {
   // Try to load from cache first
@@ -62,13 +62,19 @@ export async function initializeEmbeddings(forceRegenerate = false) {
   }
 
   // Generate new embeddings
-  console.log("Generating fresh embeddings for all resources...");
-  const embeddedResources = await embedResources(mockResources);
+  try {
+    console.log("Generating fresh embeddings for all resources...");
+    const embeddedResources = await embedResources(mockResources);
 
-  // Save to cache
-  saveEmbeddingsCache(embeddedResources);
+    // Save to cache
+    saveEmbeddingsCache(embeddedResources);
 
-  return embeddedResources;
+    return embeddedResources;
+  } catch (error) {
+    console.error("Failed to generate embeddings:", error.message);
+    console.warn("RAG will not be available. Please set OPENAI_API_KEY in .env file.");
+    return null;
+  }
 }
 
 /**

@@ -1,8 +1,65 @@
 import { generateEmbedding, cosineSimilarity } from "./embeddingService.js";
 import { getEmbeddedResources } from "./embeddingCache.js";
+import { mockResources } from "../data/mockResources.js";
+
+/**
+ * Simple keyword-based fallback when RAG is unavailable
+ */
+function findRelevantResourcesKeywordFallback(query, limit = 5) {
+  const normalize = (text) => text.toLowerCase().trim();
+  const normalizedQuery = normalize(query);
+  const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
+
+  const resourcesWithScores = mockResources.map((resource) => {
+    let score = 0;
+    const searchText = normalize([
+      resource.title,
+      resource.description,
+      resource.category,
+      ...resource.keywords,
+      ...resource.steps,
+    ].join(" "));
+
+    // Exact phrase match in title
+    if (normalize(resource.title).includes(normalizedQuery)) {
+      score += 50;
+    }
+
+    // Exact phrase match in description
+    if (normalize(resource.description).includes(normalizedQuery)) {
+      score += 30;
+    }
+
+    // Keyword matches
+    for (const keyword of resource.keywords) {
+      if (normalizedQuery.includes(normalize(keyword))) {
+        score += 20;
+      }
+    }
+
+    // Token matches
+    for (const token of queryTokens) {
+      if (token.length > 2 && searchText.includes(token)) {
+        score += 5;
+      }
+    }
+
+    return {
+      ...resource,
+      score: score,
+      similarity: score / 100, // Fake similarity for consistency
+    };
+  });
+
+  return resourcesWithScores
+    .filter((r) => r.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
 
 /**
  * Find relevant resources using semantic search with vector embeddings (RAG)
+ * Falls back to keyword matching if embeddings are unavailable
  * @param {string} query - User's question
  * @param {number} limit - Maximum number of results to return
  * @returns {Promise<Object[]>} - Relevant resources sorted by semantic similarity
@@ -11,6 +68,12 @@ export async function findRelevantResources(query, limit = 5) {
   try {
     // Get pre-computed embeddings for all resources
     const embeddedResources = await getEmbeddedResources();
+
+    // If no embeddings available, fall back to keyword matching
+    if (!embeddedResources) {
+      console.log("Using keyword-based fallback (RAG unavailable)");
+      return findRelevantResourcesKeywordFallback(query, limit);
+    }
 
     // Generate embedding for the user's query
     const queryEmbedding = await generateEmbedding(query);
@@ -44,9 +107,9 @@ export async function findRelevantResources(query, limit = 5) {
   } catch (error) {
     console.error("Error in semantic search:", error);
 
-    // If RAG fails, return fallback with empty results
-    console.warn("Falling back to empty results due to embedding error");
-    return [];
+    // Fall back to keyword matching
+    console.log("Falling back to keyword matching due to error");
+    return findRelevantResourcesKeywordFallback(query, limit);
   }
 }
 

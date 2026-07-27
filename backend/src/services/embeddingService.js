@@ -1,10 +1,20 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
+let openai = null;
 const EMBEDDING_MODEL = "text-embedding-3-small";
+
+// Lazy initialization of OpenAI client
+function getOpenAIClient() {
+  if (!openai) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not set in environment variables");
+    }
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
 
 /**
  * Generate an embedding vector for a given text
@@ -13,7 +23,8 @@ const EMBEDDING_MODEL = "text-embedding-3-small";
  */
 export async function generateEmbedding(text) {
   try {
-    const response = await openai.embeddings.create({
+    const client = getOpenAIClient();
+    const response = await client.embeddings.create({
       model: EMBEDDING_MODEL,
       input: text,
       encoding_format: "float",
@@ -33,7 +44,8 @@ export async function generateEmbedding(text) {
  */
 export async function generateEmbeddingsBatch(texts) {
   try {
-    const response = await openai.embeddings.create({
+    const client = getOpenAIClient();
+    const response = await client.embeddings.create({
       model: EMBEDDING_MODEL,
       input: texts,
       encoding_format: "float",
