@@ -22,7 +22,7 @@ router.post("/", async (req, res, next) => {
       });
     }
 
-    const relevantResources = findRelevantResources(question);
+    const relevantResources = await findRelevantResources(question);
 
     // Handle streaming request
     if (stream) {

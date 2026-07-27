@@ -1,131 +1,61 @@
-import { mockResources } from "../data/mockResources.js";
+import { generateEmbedding, cosineSimilarity } from "./embeddingService.js";
+import { getEmbeddedResources } from "./embeddingCache.js";
 
-const normalize = (value) => value.toLowerCase().replace(/[^\w\s-]/g, " ");
+/**
+ * Find relevant resources using semantic search with vector embeddings (RAG)
+ * @param {string} query - User's question
+ * @param {number} limit - Maximum number of results to return
+ * @returns {Promise<Object[]>} - Relevant resources sorted by semantic similarity
+ */
+export async function findRelevantResources(query, limit = 5) {
+  try {
+    // Get pre-computed embeddings for all resources
+    const embeddedResources = await getEmbeddedResources();
 
-// Common synonyms for better matching
-const SYNONYMS = {
-  paycheck: ["salary", "pay", "payment", "compensation", "direct deposit"],
-  password: ["login", "credentials", "access", "sign in", "authentication"],
-  benefits: ["insurance", "healthcare", "health", "medical", "dental", "vision"],
-  expense: ["reimbursement", "receipt", "spending", "cost"],
-  onboarding: ["new hire", "orientation", "getting started", "first day"],
-  equipment: ["device", "laptop", "computer", "hardware", "monitor"],
-  software: ["application", "app", "program", "tool", "system"],
-  training: ["learning", "course", "education", "development"],
-};
+    // Generate embedding for the user's query
+    const queryEmbedding = await generateEmbedding(query);
 
-export function findRelevantResources(query, limit = 5) {
-  const normalizedQuery = normalize(query);
-  const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
-  const expandedTokens = expandWithSynonyms(queryTokens);
+    // Calculate cosine similarity between query and each resource
+    const resourcesWithScores = embeddedResources.map((resource) => {
+      const similarity = cosineSimilarity(queryEmbedding, resource.embedding);
 
-  return mockResources
-    .map((resource) => ({
-      ...resource,
-      score: calculateRelevanceScore(normalizedQuery, queryTokens, expandedTokens, resource),
-    }))
-    .filter((resource) => resource.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
+      // Convert similarity (0-1) to score (0-100) for consistency
+      const score = similarity * 100;
+
+      return {
+        id: resource.id,
+        category: resource.category,
+        title: resource.title,
+        description: resource.description,
+        keywords: resource.keywords,
+        steps: resource.steps,
+        links: resource.links,
+        contacts: resource.contacts,
+        score: score,
+        similarity: similarity,
+      };
+    });
+
+    // Sort by similarity (highest first) and return top results
+    return resourcesWithScores
+      .filter((resource) => resource.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+  } catch (error) {
+    console.error("Error in semantic search:", error);
+
+    // If RAG fails, return fallback with empty results
+    console.warn("Falling back to empty results due to embedding error");
+    return [];
+  }
 }
 
-function expandWithSynonyms(tokens) {
-  const expanded = new Set(tokens);
-
-  for (const token of tokens) {
-    for (const [key, synonyms] of Object.entries(SYNONYMS)) {
-      if (token === key || synonyms.includes(token)) {
-        expanded.add(key);
-        synonyms.forEach(syn => expanded.add(syn));
-      }
-    }
-  }
-
-  return Array.from(expanded);
-}
-
-function calculateRelevanceScore(query, queryTokens, expandedTokens, resource) {
-  const searchableText = normalize(
-    [
-      resource.category,
-      resource.title,
-      resource.description,
-      ...resource.keywords,
-      ...resource.steps,
-    ].join(" ")
-  );
-
-  let score = 0;
-
-  // Exact phrase match in title (highest priority)
-  if (normalize(resource.title).includes(query)) {
-    score += 25;
-  }
-
-  // Exact phrase match in description
-  if (normalize(resource.description).includes(query)) {
-    score += 15;
-  }
-
-  // Keyword matching (high priority)
-  for (const keyword of resource.keywords) {
-    const normalizedKeyword = normalize(keyword).trim();
-    if (normalizedKeyword && query.includes(normalizedKeyword)) {
-      // Multi-word keywords are more specific
-      score += normalizedKeyword.includes(" ") ? 20 : 12;
-    }
-  }
-
-  // Category matching
-  if (normalize(resource.category).includes(query)) {
-    score += 10;
-  }
-
-  // Token matching with position weighting (early tokens more important)
-  for (let i = 0; i < queryTokens.length; i++) {
-    const token = queryTokens[i];
-    if (token.length > 2 && searchableText.includes(token)) {
-      // Earlier tokens get slightly higher weight
-      const positionWeight = Math.max(1, 3 - i * 0.5);
-      score += positionWeight;
-    }
-  }
-
-  // Synonym and expanded token matching
-  for (const token of expandedTokens) {
-    if (token.length > 2 && !queryTokens.includes(token) && searchableText.includes(token)) {
-      score += 4; // Bonus for synonym matches
-    }
-  }
-
-  // Title token matching (individual words in title)
-  const titleTokens = normalize(resource.title).split(/\s+/);
-  for (const queryToken of queryTokens) {
-    if (queryToken.length > 2 && titleTokens.includes(queryToken)) {
-      score += 8;
-    }
-  }
-
-  // Steps matching (indicates procedural relevance)
-  let stepMatches = 0;
-  for (const step of resource.steps) {
-    const normalizedStep = normalize(step);
-    for (const token of queryTokens) {
-      if (token.length > 2 && normalizedStep.includes(token)) {
-        stepMatches++;
-      }
-    }
-  }
-  score += Math.min(stepMatches * 2, 10); // Cap step bonus at 10
-
-  // Penalize very low scores to filter noise
-  if (score < 3) {
-    return 0;
-  }
-
-  return score;
-}
-
+/**
+ * Build fallback guidance when Claude API fails or returns invalid response
+ * @param {string} question - Original user question
+ * @param {Object[]} relevantResources - Retrieved resources
+ * @returns {Object} - Fallback guidance object
+ */
 export function buildFallbackGuidance(question, relevantResources) {
   const topResource = relevantResources[0];
 
@@ -152,21 +82,30 @@ export function buildFallbackGuidance(question, relevantResources) {
     };
   }
 
+  // Determine confidence based on semantic similarity score
+  let confidence = "low";
+  if (topResource.score >= 70) {
+    confidence = "high";
+  } else if (topResource.score >= 40) {
+    confidence = "medium";
+  }
+
   return {
     answer: `${topResource.title}: ${topResource.description}`,
     nextSteps: topResource.steps,
     resources: topResource.links,
-    confidence: topResource.score >= 18 ? "high" : "medium",
+    confidence: confidence,
     escalation: {
       contact: `${topResource.contacts[0].role} (${topResource.contacts[0].email})`,
       reason: "Escalate if you cannot access the linked portal or your request is blocked.",
     },
     source: "fallback",
-    matchedResources: relevantResources.map(({ id, title, category, score }) => ({
+    matchedResources: relevantResources.map(({ id, title, category, score, similarity }) => ({
       id,
       title,
       category,
-      score,
+      score: Math.round(score * 10) / 10, // Round to 1 decimal
+      similarity: Math.round(similarity * 1000) / 1000, // Round to 3 decimals
     })),
     question,
   };

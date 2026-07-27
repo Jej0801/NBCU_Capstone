@@ -8,7 +8,15 @@
       "Bash(npm install:*)",
       "Bash(curl:*)",
       "Bash(node -c:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(npm start)",
+      "Bash(lsof:*)",
+      "Bash(python3:*)",
+      "Bash(kill:*)"
     ],
     "deny": [],
     "ask": []
