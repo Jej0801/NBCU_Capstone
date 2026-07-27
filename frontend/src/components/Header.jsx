@@ -1,4 +1,4 @@
-export default function Header({ onSearchClick }) {
+export default function Header() {
   return (
     <header className="main-header">
       <div className="header-left">
@@ -23,7 +23,7 @@ export default function Header({ onSearchClick }) {
       </div>
 
       <div className="header-center">
-        <button className="search-bar" onClick={onSearchClick}>
+        <div className="search-bar-placeholder">
           <svg
             width="16"
             height="16"
@@ -36,7 +36,7 @@ export default function Header({ onSearchClick }) {
             <line x1="11" y1="11" x2="15" y2="15" />
           </svg>
           <span>Search this site</span>
-        </button>
+        </div>
       </div>
 
       <div className="header-right">

@@ -9,7 +9,6 @@ import Toast from "./components/Toast.jsx";
 import { toastMessages } from "./services/mockData.js";
 
 export default function App() {
-  const [showNavigationModal, setShowNavigationModal] = useState(false);
   const [toasts, setToasts] = useState([]);
 
   const showToast = (message, type = "success") => {
@@ -39,7 +38,7 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <Header onSearchClick={() => setShowNavigationModal(true)} />
+      <Header />
       <NavigationBar />
 
       <main className="main-content">
@@ -48,16 +47,15 @@ export default function App() {
 
           <GrowthResources onEnroll={handleEnroll} />
 
+          {/* Ask Atlas Widget - Embedded */}
+          <NavigationModal embedded={true} />
+
           <div className="events-communities-grid">
             <EventCalendar onRSVP={handleRSVP} />
             <Communities onJoin={handleJoinCommunity} />
           </div>
         </section>
       </main>
-
-      {showNavigationModal && (
-        <NavigationModal onClose={() => setShowNavigationModal(false)} />
-      )}
 
       {/* Toast Notifications */}
       <div className="toast-container">

@@ -143,6 +143,26 @@ body {
   stroke: var(--text-light);
 }
 
+.search-bar-placeholder {
+  width: 100%;
+  background: white;
+  border: none;
+  border-radius: calc(6px * var(--scale-factor));
+  padding: calc(8px * var(--scale-factor)) calc(16px * var(--scale-factor));
+  display: flex;
+  align-items: center;
+  gap: calc(10px * var(--scale-factor));
+  font-size: calc(14px * var(--scale-factor));
+  color: var(--text-medium);
+  cursor: default;
+}
+
+.search-bar-placeholder svg {
+  width: calc(16px * var(--scale-factor));
+  height: calc(16px * var(--scale-factor));
+  stroke: var(--text-light);
+}
+
 .user-profile {
   background: none;
   border: none;
@@ -2016,7 +2036,7 @@ body {
   }
 }
 
-/* Main widget container */
+/* Main widget container (modal mode) */
 .atlas-widget {
   position: relative;
   background: var(--atlas-card-bg);
@@ -2029,6 +2049,20 @@ body {
   flex-direction: column;
   padding: 48px 32px 32px;
   animation: atlasSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Embedded widget container (on-page mode) */
+.atlas-widget-embedded {
+  position: relative;
+  background: var(--atlas-card-bg);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 900px;
+  width: 100%;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  padding: 48px 32px 32px;
 }
 
 @keyframes atlasSlideUp {

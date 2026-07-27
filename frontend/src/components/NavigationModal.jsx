@@ -12,7 +12,7 @@ const suggestedQuestions = [
   "Who do I contact for equipment issues?",
 ];
 
-export default function NavigationModal({ onClose }) {
+export default function NavigationModal({ onClose, embedded = false }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]); // {role: 'user'|'assistant', content, ...}
   const [isLoading, setIsLoading] = useState(false);
@@ -110,16 +110,18 @@ export default function NavigationModal({ onClose }) {
 
   const hasMessages = messages.length > 0;
 
-  return (
-    <div className="atlas-modal-overlay" onClick={onClose}>
-      <div className="atlas-widget" onClick={(e) => e.stopPropagation()}>
-        {/* Close button */}
+  // Widget content (shared between modal and embedded modes)
+  const widgetContent = (
+    <div className={embedded ? "atlas-widget-embedded" : "atlas-widget"} onClick={(e) => e.stopPropagation()}>
+      {/* Close button - only show in modal mode */}
+      {!embedded && onClose && (
         <button className="atlas-close-btn" onClick={onClose} aria-label="Close">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" />
             <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" />
           </svg>
         </button>
+      )}
 
         {/* Header - visible when no messages or collapsed after messages start */}
         {!hasMessages && (
@@ -243,6 +245,16 @@ export default function NavigationModal({ onClose }) {
           </div>
         </form>
       </div>
+  );
+
+  // Return embedded or modal version
+  if (embedded) {
+    return widgetContent;
+  }
+
+  return (
+    <div className="atlas-modal-overlay" onClick={onClose}>
+      {widgetContent}
     </div>
   );
 }
